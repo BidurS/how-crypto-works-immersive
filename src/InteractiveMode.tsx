@@ -20,11 +20,14 @@ import {
   List as ListIcon,
   Check as CheckIcon,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Info,
+  Lock,
+  Terminal as TerminalIcon
 } from 'lucide-react';
 import { BitcoinVisual, EthereumVisual, SolanaVisual, GenericVisual, AMMVisual } from './components/ThreeVisuals';
 import { useProgress } from './hooks/useProgress';
-import { renderWithGlossary } from './utils/glossary';
+import { renderWithGlossary, glossaryData } from './utils/glossary';
 import './InteractiveMode.css';
 
 interface ChapterMeta {
@@ -41,12 +44,88 @@ interface InteractiveModeProps {
 }
 
 // ----------------------------------------------------------------------
+// Protocol Event Terminal
+// ----------------------------------------------------------------------
+const TerminalFeed = ({ slug }: { slug: string }) => {
+  const [logs, setTerminalLogs] = useState<{ id: string; text: string; type: 'info' | 'success' | 'warning' }[]>([]);
+
+  useEffect(() => {
+    const getThemeLogs = () => {
+      switch(slug) {
+        case 'bitcoin': return [
+          { text: `[POW] Solving block hash... 0000000000000000${Math.random().toString(16).slice(2, 10)}`, type: 'info' },
+          { text: `[NET] New transaction received: ${Math.random().toString(36).slice(2, 10)} BTC`, type: 'info' },
+          { text: `[CONSENSUS] Longest chain tip updated to #${827000 + Math.floor(Math.random() * 1000)}`, type: 'success' },
+        ];
+        case 'ethereum': return [
+          { text: `[EVM] Executing contract call at 0x${Math.random().toString(16).slice(2, 42)}`, type: 'info' },
+          { text: `[MEMPOOL] 12 transactions queued. Gas: ${15 + Math.floor(Math.random() * 10)} gwei`, type: 'warning' },
+          { text: `[L2] State batch confirmed on Mainnet`, type: 'success' },
+        ];
+        case 'solana': return [
+          { text: `[POH] Clock pulse: slot ${123456789 + Math.floor(Math.random() * 1000)}`, type: 'info' },
+          { text: `[NET] Current TPS: ${2500 + Math.floor(Math.random() * 1000)}`, type: 'success' },
+          { text: `[VOTE] Validator 0x${Math.random().toString(16).slice(2, 8)} recorded vote`, type: 'info' },
+        ];
+        case 'defi': return [
+          { text: `[AMM] Swap detected: 1.5 ETH -> ${3500 + Math.floor(Math.random() * 100)} USDC`, type: 'info' },
+          { text: `[LP] Liquidity provision: 10,000 USDT added to pool`, type: 'success' },
+          { text: `[ORACLE] Chainlink update: ETH/USD = $2,450.12`, type: 'info' },
+        ];
+        default: return [
+          { text: `[SYSTEM] Protocol analyzer synchronized.`, type: 'info' },
+          { text: `[NET] Peer connection established: 127.0.0.1:8333`, type: 'success' },
+        ];
+      }
+    };
+
+    const interval = setInterval(() => {
+      const themes = getThemeLogs();
+      const theme = themes[Math.floor(Math.random() * themes.length)];
+      const newLog = { 
+        id: Math.random().toString(), 
+        text: theme.text,
+        type: theme.type as 'info' | 'success' | 'warning'
+      };
+      setTerminalLogs(prev => [newLog, ...prev].slice(0, 5));
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [slug]);
+
+  return (
+    <div className="protocol-terminal">
+      <div className="terminal-header">
+        <TerminalIcon size={14} />
+        <span>Live Protocol Feed</span>
+        <div className="terminal-status-dot"></div>
+      </div>
+      <div className="terminal-body">
+        <AnimatePresence initial={false}>
+          {logs.map((log) => (
+            <motion.div 
+              key={log.id}
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              className={`terminal-line ${log.type}`}
+            >
+              <span className="line-timestamp">[{new Date().toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' })}]</span>
+              <span className="line-text">{log.text}</span>
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </div>
+    </div>
+  );
+};
+
+// ----------------------------------------------------------------------
 // 3D Visual Router
 // ----------------------------------------------------------------------
-const ThreeDVisualizer = ({ slug, isMining, ammRatio }: { slug: string, isMining: boolean, ammRatio: number }) => {
+const ThreeDVisualizer = ({ slug, isMining, ammRatio, activeSection }: { slug: string, isMining: boolean, ammRatio: number, activeSection: string }) => {
   const getVisual = () => {
     switch(slug) {
-      case 'bitcoin': return <BitcoinVisual isMining={isMining} />;
+      case 'bitcoin': return <BitcoinVisual isMining={isMining} state={activeSection} />;
       case 'ethereum': return <EthereumVisual />;
       case 'solana': return <SolanaVisual />;
       case 'defi': return <AMMVisual ratio={ammRatio} />;
@@ -404,8 +483,7 @@ export default function InteractiveMode({ chapters, onToggleView }: InteractiveM
   const [isSyllabusCollapsed, setIsSyllabusCollapsed] = useState(false);
   
   // Progress State
-  const { saveQuizResult, calculateTotalProgress, getChapterProgress } = useProgress();
-  const globalProgress = calculateTotalProgress(chapters.length);
+  const { saveQuizResult, getChapterProgress } = useProgress();
 
   // Sandbox State
   const [isMining, setIsMining] = useState(false);
@@ -417,6 +495,31 @@ export default function InteractiveMode({ chapters, onToggleView }: InteractiveM
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [score, setScore] = useState(0);
   const [quizFinished, setQuizFinished] = useState(false);
+
+  // Interactive Gates State
+  const [isGated, setIsGated] = useState(false);
+  const [gateUnlocked, setGateUnlocked] = useState(false);
+
+  // Logic to trigger gate
+  useEffect(() => {
+    if (slug === 'bitcoin' && !gateUnlocked) {
+      setIsGated(true);
+    } else {
+      setIsGated(false);
+    }
+  }, [slug, gateUnlocked]);
+
+  // Logic to unlock gate
+  useEffect(() => {
+    let timer: any;
+    if (isMining && isGated) {
+      timer = setTimeout(() => {
+        setGateUnlocked(true);
+        setIsGated(false);
+      }, 2000);
+    }
+    return () => clearTimeout(timer);
+  }, [isMining, isGated]);
 
   const currentIndex = chapters.findIndex(c => c.slug === slug);
   const chapterMeta = chapters[currentIndex];
@@ -498,6 +601,27 @@ export default function InteractiveMode({ chapters, onToggleView }: InteractiveM
     setQuizFinished(false);
   };
 
+  // Find glossary terms in active section
+  const [activeGlossaryTerms, setActiveGlossaryTerms] = useState<string[]>([]);
+  useEffect(() => {
+    if (!activeSection) return;
+    // Extract text for the current section (rough heuristic)
+    const sectionElement = document.getElementById(activeSection);
+    if (sectionElement) {
+       let text = sectionElement.innerText;
+       let nextEl = sectionElement.nextElementSibling;
+       while (nextEl && !nextEl.classList.contains('lab-h2') && !nextEl.classList.contains('lab-h3')) {
+         text += (nextEl as HTMLElement).innerText;
+         nextEl = nextEl.nextElementSibling;
+       }
+       
+       const found = Object.keys(glossaryData).filter(term => 
+         text.toLowerCase().includes(term.toLowerCase())
+       );
+       setActiveGlossaryTerms(found);
+    }
+  }, [activeSection, content]);
+
   return (
     <div className="learning-lab-container" style={{ '--active-accent': activeColor } as any}>
       {/* Top Header Navigation */}
@@ -516,10 +640,27 @@ export default function InteractiveMode({ chapters, onToggleView }: InteractiveM
           <h1 className="lab-module-title">{chapterMeta?.title}</h1>
         </div>
         <div className="lab-header-right">
-          <div className="lab-progress-container desktop-only">
-            <span className="progress-text">Course Mastery</span>
-            <div className="lab-progress-track">
-              <div className="lab-progress-fill" style={{ width: `${globalProgress}%` }}></div>
+          <div className="lab-progress-blocks-wrap desktop-only">
+            <span className="progress-text">Block Path Progress</span>
+            <div className="lab-progress-blocks">
+              {chapters.map((c, i) => {
+                const { completed } = getChapterProgress(c.slug);
+                const isActive = c.slug === slug;
+                const chapterColor = getChapterColor(c.slug);
+                return (
+                  <div key={c.id} className="block-path-item">
+                    <div 
+                      className={`progress-block ${completed ? 'completed' : ''} ${isActive ? 'active' : ''}`}
+                      style={{ 
+                        '--block-color': chapterColor,
+                        backgroundColor: completed ? chapterColor : (isActive ? `${chapterColor}40` : 'rgba(255,255,255,0.05)')
+                      } as any}
+                      title={c.title}
+                    />
+                    {i < chapters.length - 1 && <div className={`block-link ${completed ? 'completed' : ''}`}></div>}
+                  </div>
+                );
+              })}
             </div>
           </div>
           <button className="lab-home-btn mode-switch-btn" onClick={onToggleView}>Mode</button>
@@ -582,7 +723,7 @@ export default function InteractiveMode({ chapters, onToggleView }: InteractiveM
           
           {/* True 3D React Three Fiber Visualizer */}
           <div className="nano-banana-card">
-             <ThreeDVisualizer slug={slug || ''} isMining={isMining} ammRatio={ammRatio} />
+             <ThreeDVisualizer slug={slug || ''} isMining={isMining} ammRatio={ammRatio} activeSection={activeSection} />
              
              {/* Dynamic Sandbox UI Overlays */}
              {slug === 'bitcoin' && (
@@ -619,6 +760,31 @@ export default function InteractiveMode({ chapters, onToggleView }: InteractiveM
                </div>
              )}
           </div>
+
+          {/* New Protocol Event Terminal */}
+          <TerminalFeed slug={slug || ''} />
+
+          {/* Active Glossary Context */}
+          <AnimatePresence>
+            {activeGlossaryTerms.length > 0 && (
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="interactive-card glossary-card"
+              >
+                <div className="card-header"><Info size={18} /> <span>Active Context</span></div>
+                <div className="card-body glossary-highlights">
+                  {activeGlossaryTerms.map(term => (
+                    <div key={term} className="glossary-highlight-item">
+                      <span className="gh-term">{term}</span>
+                      <p className="gh-def">{glossaryData[term]}</p>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Interactive Knowledge Check */}
           <div className="interactive-card quiz-card">
@@ -761,34 +927,57 @@ export default function InteractiveMode({ chapters, onToggleView }: InteractiveM
                   exit={{ opacity: 0 }}
                   className="lab-markdown-container"
                 >
-                  <ReactMarkdown 
-                    remarkPlugins={[remarkGfm]}
-                    components={{
-                      h1: () => null, // Hidden as it's in the header
-                      h2: ({node, children, ...props}: any) => {
-                        const id = children?.toString().toLowerCase().replace(/\s+/g, '-');
-                        return <h2 id={id} className="lab-h2" {...props}>{children}</h2>;
-                      },
-                      h3: ({node, children, ...props}: any) => {
-                        const id = children?.toString().toLowerCase().replace(/\s+/g, '-');
-                        return <h3 id={id} className="lab-h3" {...props}>{children}</h3>;
-                      },
-                      p: ({node, children, ...props}: any) => <p className="lab-p" {...props}>{renderWithGlossary(children)}</p>,
-                      ul: ({node, ...props}) => <ul className="lab-ul" {...props} />,
-                      ol: ({node, ...props}) => <ol className="lab-ol" {...props} />,
-                      li: ({node, children, ...props}: any) => <li className="lab-li" {...props}>{renderWithGlossary(children)}</li>,
-                      blockquote: ({node, ...props}) => <blockquote className="lab-quote" {...props} />,
-                      code({node, inline, className, children, ...props}: any) {
-                        return (
-                          <code className={`${className} lab-code ${inline ? 'inline' : 'block'}`} {...props}>
-                            {children}
-                          </code>
-                        )
-                      }
-                    }}
-                  >
-                    {content}
-                  </ReactMarkdown>
+                  <div className="markdown-content-wrap" style={{ position: 'relative' }}>
+                    <ReactMarkdown 
+                      remarkPlugins={[remarkGfm]}
+                      components={{
+                        h1: () => null, // Hidden as it's in the header
+                        h2: ({node, children, ...props}: any) => {
+                          const id = children?.toString().toLowerCase().replace(/\s+/g, '-');
+                          return <h2 id={id} className="lab-h2" {...props}>{children}</h2>;
+                        },
+                        h3: ({node, children, ...props}: any) => {
+                          const id = children?.toString().toLowerCase().replace(/\s+/g, '-');
+                          return <h3 id={id} className="lab-h3" {...props}>{children}</h3>;
+                        },
+                        p: ({node, children, ...props}: any) => <p className="lab-p" {...props}>{renderWithGlossary(children)}</p>,
+                        ul: ({node, ...props}) => <ul className="lab-ul" {...props} />,
+                        ol: ({node, ...props}) => <ol className="lab-ol" {...props} />,
+                        li: ({node, children, ...props}: any) => <li className="lab-li" {...props}>{renderWithGlossary(children)}</li>,
+                        blockquote: ({node, ...props}) => <blockquote className="lab-quote" {...props} />,
+                        code({node, inline, className, children, ...props}: any) {
+                          return (
+                            <code className={`${className} lab-code ${inline ? 'inline' : 'block'}`} {...props}>
+                              {children}
+                            </code>
+                          )
+                        }
+                      }}
+                    >
+                      {content}
+                    </ReactMarkdown>
+
+                    {/* Interactive Gate Overlay */}
+                    <AnimatePresence>
+                      {isGated && (
+                        <motion.div 
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          className="lab-content-gate"
+                        >
+                          <div className="gate-inner">
+                            <Lock size={48} className="gate-icon" />
+                            <h3>Protocol Interaction Required</h3>
+                            <p>To understand Proof of Work, you must first experience the computational cost. Use the 3D Engine on the left to <strong>mine a block</strong> and unlock the rest of the chapter.</p>
+                            <div className="gate-hint">
+                              <Sparkles size={16} /> <span>Hint: Hold the 'MINE BLOCK' button until hashing is complete.</span>
+                            </div>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
 
                   {/* Module Progression */}
                   {nextChapter && (

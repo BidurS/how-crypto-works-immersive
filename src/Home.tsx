@@ -30,7 +30,7 @@ export default function Home({ onSelectMode }: HomeProps) {
     {
       id: 'interactive',
       title: 'Learning Lab',
-      description: 'Deep-dive with AI-generated visuals and interactive knowledge checks for every chapter.',
+      description: 'The premium technical experience. Scroll-synced 3D visuals, active context glossary, and protocol sandboxes.',
       icon: <Brain size={32} />,
       color: '#10b981',
       progress: globalProgress

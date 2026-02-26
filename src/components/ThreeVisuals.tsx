@@ -6,26 +6,66 @@ import * as THREE from 'three';
 // ----------------------------------------------------------------------------
 // Core Bitcoin Engine (Decentralized Nodes & Hashing)
 // ----------------------------------------------------------------------------
-export const BitcoinVisual = ({ isMining }: { isMining?: boolean }) => {
+export const BitcoinVisual = ({ isMining, state: visualState }: { isMining?: boolean, state?: string }) => {
   const groupRef = useRef<THREE.Group>(null);
+  const coreRef = useRef<THREE.Mesh>(null);
   
   useFrame((state) => {
     if (groupRef.current) {
-      const speed = isMining ? 1.5 : 0.2;
+      const speed = (isMining || visualState === 'mining-and-proof-of-work') ? 1.5 : 0.2;
       groupRef.current.rotation.y += state.clock.getDelta() * speed;
+    }
+    if (coreRef.current && visualState === 'monetary-policy') {
+       // Pulse effect for halving
+       const scale = 1 + Math.sin(state.clock.elapsedTime * 4) * 0.1;
+       coreRef.current.scale.set(scale, scale, scale);
     }
   });
 
+  const isUTXO = visualState === 'utxo-model';
+
   return (
     <group ref={groupRef}>
-      <Float speed={isMining ? 10 : 2} rotationIntensity={isMining ? 2 : 0.5} floatIntensity={1}>
-        <Icosahedron args={[1.5, 1]}>
-          <meshBasicMaterial color="#facc15" wireframe transparent opacity={0.3} />
-        </Icosahedron>
-        <Sphere args={[0.8, 32, 32]}>
-          <MeshDistortMaterial color="#f59e0b" distort={isMining ? 0.8 : 0.4} speed={isMining ? 5 : 2} roughness={0} metalness={0.8} />
-        </Sphere>
-      </Float>
+      {!isUTXO ? (
+        <Float speed={isMining ? 10 : 2} rotationIntensity={isMining ? 2 : 0.5} floatIntensity={1}>
+          <Icosahedron args={[1.5, 1]}>
+            <meshBasicMaterial color="#facc15" wireframe transparent opacity={0.3} />
+          </Icosahedron>
+          <Sphere ref={coreRef} args={[0.8, 32, 32]}>
+            <MeshDistortMaterial 
+              color="#f59e0b" 
+              emissive="#f59e0b"
+              emissiveIntensity={isMining ? 2 : 0.5}
+              distort={(isMining || visualState === 'mining-and-proof-of-work') ? 0.8 : 0.4} 
+              speed={isMining ? 5 : 2} 
+              roughness={0} 
+              metalness={0.8} 
+            />
+          </Sphere>
+          {/* Fake Glow Bloom */}
+          <Sphere args={[1.2, 32, 32]}>
+            <meshBasicMaterial color="#f59e0b" transparent opacity={0.05} />
+          </Sphere>
+        </Float>
+      ) : (
+        /* UTXO Representation: A cluster of small coins/bills */
+        <group>
+          {[...Array(12)].map((_, i) => (
+            <Float key={i} speed={2} rotationIntensity={1} floatIntensity={1}>
+              <Box 
+                args={[0.4, 0.6, 0.05]} 
+                position={[
+                  Math.sin(i * 0.5) * 1.5, 
+                  Math.cos(i * 0.5) * 1.5, 
+                  Math.sin(i) * 0.5
+                ]}
+              >
+                <meshStandardMaterial color="#facc15" emissive="#facc15" emissiveIntensity={0.2} metalness={0.8} roughness={0.2} />
+              </Box>
+            </Float>
+          ))}
+        </group>
+      )}
       
       {/* Node Orbits */}
       {[...Array(6)].map((_, i) => (
@@ -46,11 +86,6 @@ export const BitcoinVisual = ({ isMining }: { isMining?: boolean }) => {
 // DeFi AMM Sandbox (Constant Product Pool)
 // ----------------------------------------------------------------------------
 export const AMMVisual = ({ ratio }: { ratio: number }) => {
-  // ratio is from 0 to 1. 0.5 is balanced.
-  // x * y = k. Let k = 1.
-  // if ratio = 0.5, x=1, y=1.
-  // if ratio = 0.1, x is small, y is large.
-  
   const xSize = 0.5 + ratio * 1.5;
   const ySize = 0.5 + (1 - ratio) * 1.5;
 
@@ -60,13 +95,13 @@ export const AMMVisual = ({ ratio }: { ratio: number }) => {
         {/* Token X */}
         <mesh position={[-1.5, 0, 0]}>
           <sphereGeometry args={[xSize, 32, 32]} />
-          <meshStandardMaterial color="#ec4899" roughness={0.1} metalness={0.8} />
+          <meshStandardMaterial color="#ec4899" emissive="#ec4899" emissiveIntensity={0.5} roughness={0.1} metalness={0.8} />
         </mesh>
         
         {/* Token Y */}
         <mesh position={[1.5, 0, 0]}>
           <sphereGeometry args={[ySize, 32, 32]} />
-          <meshStandardMaterial color="#3b82f6" roughness={0.1} metalness={0.8} />
+          <meshStandardMaterial color="#3b82f6" emissive="#3b82f6" emissiveIntensity={0.5} roughness={0.1} metalness={0.8} />
         </mesh>
 
         {/* The Connection (The Pool) */}
@@ -80,10 +115,10 @@ export const AMMVisual = ({ ratio }: { ratio: number }) => {
       </Float>
       
       {/* Liquid particles orbiting the pool */}
-      {[...Array(10)].map((_, i) => (
+      {[...Array(15)].map((_, i) => (
         <Float key={i} speed={3} rotationIntensity={2} floatIntensity={1}>
-          <mesh position={[Math.cos(i) * 2, Math.sin(i) * 2, Math.sin(i * 2)]}>
-            <boxGeometry args={[0.1, 0.1, 0.1]} />
+          <mesh position={[Math.cos(i) * 2.5, Math.sin(i) * 2.5, Math.sin(i * 2) * 0.5]}>
+            <boxGeometry args={[0.05, 0.05, 0.05]} />
             <meshBasicMaterial color={i % 2 === 0 ? "#ec4899" : "#3b82f6"} />
           </mesh>
         </Float>
@@ -113,7 +148,7 @@ export const EthereumVisual = () => {
         {/* EVM Core */}
         <mesh ref={innerRef}>
           <octahedronGeometry args={[1, 0]} />
-          <meshPhysicalMaterial color="#c084fc" roughness={0.1} metalness={0.9} clearcoat={1} transparent opacity={0.9} />
+          <meshPhysicalMaterial color="#c084fc" emissive="#c084fc" emissiveIntensity={1} roughness={0.1} metalness={0.9} clearcoat={1} transparent opacity={0.9} />
         </mesh>
         
         {/* Layer 2 / Smart Contract execution layer */}
@@ -121,7 +156,22 @@ export const EthereumVisual = () => {
           <octahedronGeometry args={[1.8, 1]} />
           <meshBasicMaterial color="#9333ea" wireframe transparent opacity={0.4} />
         </mesh>
+
+        {/* Glow Sphere */}
+        <Sphere args={[1.5, 32, 32]}>
+          <meshBasicMaterial color="#c084fc" transparent opacity={0.05} />
+        </Sphere>
       </Float>
+
+      {/* Floating Contract "Opcodes" */}
+      {[...Array(10)].map((_, i) => (
+        <Float key={i} speed={2} floatIntensity={2}>
+          <mesh position={[Math.cos(i) * 3, Math.sin(i) * 3, Math.tan(i) * 0.5]}>
+            <tetrahedronGeometry args={[0.1]} />
+            <meshBasicMaterial color="#a855f7" />
+          </mesh>
+        </Float>
+      ))}
     </group>
   );
 };
@@ -135,7 +185,7 @@ export const SolanaVisual = () => {
 
   useFrame(() => {
     if (groupRef.current) {
-      groupRef.current.position.z = (clock.elapsedTime * 2) % 4;
+      groupRef.current.position.z = (clock.elapsedTime * 3) % 4;
     }
   });
 
@@ -145,20 +195,26 @@ export const SolanaVisual = () => {
       <group ref={groupRef}>
         {[...Array(20)].map((_, i) => (
           <Box key={i} args={[0.8, 0.1, 0.4]} position={[0, 0, -i * 0.8]}>
-            <meshStandardMaterial color="#14f195" emissive="#14f195" emissiveIntensity={0.5 - (i * 0.02)} transparent opacity={1 - (i * 0.05)} />
+            <meshStandardMaterial 
+              color="#14f195" 
+              emissive="#14f195" 
+              emissiveIntensity={1 - (i * 0.04)} 
+              transparent 
+              opacity={1 - (i * 0.05)} 
+            />
           </Box>
         ))}
       </group>
       
       {/* High-speed transaction lines */}
-      {[...Array(15)].map((_, i) => (
+      {[...Array(25)].map((_, i) => (
         <Line 
           key={`line-${i}`}
-          points={[[Math.random() * 4 - 2, Math.random() * 4 - 2, 5], [Math.random() * 4 - 2, Math.random() * 4 - 2, -10]]} 
-          color="#9945FF" 
-          lineWidth={2}
+          points={[[Math.random() * 6 - 3, Math.random() * 6 - 3, 5], [Math.random() * 6 - 3, Math.random() * 6 - 3, -10]]} 
+          color={i % 2 === 0 ? "#14f195" : "#9945FF"} 
+          lineWidth={1}
           transparent
-          opacity={0.3}
+          opacity={0.2}
         />
       ))}
     </group>
@@ -185,7 +241,7 @@ export const GenericVisual = () => {
         <meshBasicMaterial color="#4b5563" wireframe transparent opacity={0.2} />
       </Icosahedron>
       <Sphere args={[0.5, 16, 16]}>
-        <meshStandardMaterial color="#ffffff" emissive="#ffffff" emissiveIntensity={0.2} />
+        <meshStandardMaterial color="#ffffff" emissive="#ffffff" emissiveIntensity={0.5} />
       </Sphere>
     </group>
   );
