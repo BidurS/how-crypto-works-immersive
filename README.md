@@ -1,73 +1,101 @@
-# React + TypeScript + Vite
+# How Crypto Actually Works: Immersive Web Experience
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This is the source code for the immersive web companion to Larry Cermak's book, ["How Crypto Actually Works"](https://github.com/lawmaster10/howcryptoworksbook). 
 
-Currently, two official plugins are available:
+The application transforms 90,000+ words of technical content into an interactive "Protocol Simulator" using React, Three.js, and Framer Motion.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+**Live Demo:** [https://how-crypto-works.pages.dev](https://how-crypto-works.pages.dev)
 
-## React Compiler
+---
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 🚀 Key Features
 
-## Expanding the ESLint configuration
+- **Standard Web Mode:** A modern, clean reading interface optimized for all devices.
+- **Kindle Edition:** A fully interactive 3D book spread with horizontal pagination and physics-based cover transitions.
+- **Learning Lab:** The premium "Protocol Simulator" mode featuring:
+  - **Scroll-Synced 3D Visuals:** Models that morph and react as you read through different technical sections.
+  - **Active Context Glossary:** Real-time extraction of cryptographic terms from the visible section.
+  - **Protocol Sandboxes:** Interaction-gated learning (e.g., mine a block to unlock content).
+  - **Live Terminal Feed:** Real-time simulated logs from blockchain nodes (PoW, EVM, PoH).
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+---
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## 🛠 Tech Stack
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+- **Framework:** React 19 + TypeScript
+- **Bundler:** Vite 8 (Beta)
+- **3D Engine:** React Three Fiber + Three.js
+- **Animations:** Framer Motion
+- **Markdown:** React Markdown + Remark GFM
+- **Icons:** Lucide React
+- **Deployment:** Cloudflare Pages
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+---
+
+## 💻 Local Development
+
+Follow these steps to run the website on your local machine.
+
+### Prerequisites
+
+- [Node.js](https://nodejs.org/) (v18 or higher recommended)
+- `npm` or `yarn`
+
+### Installation
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/BidurS/how-crypto-works-immersive.git
+   cd how-crypto-works-immersive/how-crypto-works-web
+   ```
+
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
+
+3. **Prepare Book Content:**
+   The website syncs with the latest chapter content using a build-time script. Run this to bundle the chapters into the app:
+   ```bash
+   npm run prepare-book
+   ```
+
+4. **Start Development Server:**
+   ```bash
+   npm run dev
+   ```
+   The site will be available at `http://localhost:5173`.
+
+---
+
+## 🏗 Build & Deployment
+
+### Production Build
+To create an optimized production bundle:
+```bash
+npm run build
+```
+The output will be in the `dist/` directory.
+
+### Cloudflare Pages Deployment
+This project is configured for Cloudflare Pages. You can deploy manually using Wrangler:
+```bash
+npx wrangler pages deploy dist --project-name how-crypto-works
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+---
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## 📖 Content Management
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+The book's raw markdown content is stored in the `.book_content` directory (synced via git submodule or manual copy). 
+
+- **Adding Chapters:** Modify `scripts/prepare-book.js` and `src/chapters.json` to include new files.
+- **Glossary:** Definitions are managed in `src/utils/glossary.tsx`.
+- **Interactive Logic:** Chapter-specific gates and terminal logs are configured in `src/InteractiveMode.tsx`.
+
+---
+
+## ⚖️ License
+
+Code is licensed under MIT.
+Book content is licensed under [CC BY-NC-ND 4.0](https://creativecommons.org/licenses/by-nc-nd/4.0/).
