@@ -18,7 +18,9 @@ import {
   RefreshCw,
   Zap,
   List as ListIcon,
-  Check as CheckIcon
+  Check as CheckIcon,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import { BitcoinVisual, EthereumVisual, SolanaVisual, GenericVisual, AMMVisual } from './components/ThreeVisuals';
 import { useProgress } from './hooks/useProgress';
@@ -357,6 +359,7 @@ export default function InteractiveMode({ chapters, onToggleView }: InteractiveM
   const [content, setContent] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [isSyllabusOpen, setIsSyllabusOpen] = useState(false);
+  const [isSyllabusCollapsed, setIsSyllabusCollapsed] = useState(false);
   
   // Progress State
   const { saveQuizResult, calculateTotalProgress, getChapterProgress } = useProgress();
@@ -460,39 +463,53 @@ export default function InteractiveMode({ chapters, onToggleView }: InteractiveM
         </div>
       </header>
 
-      <main className="lab-layout">
+      <main className={`lab-layout ${isSyllabusCollapsed ? 'syllabus-collapsed' : ''}`}>
         
         {/* Mobile Sidebar Overlay */}
         {isSyllabusOpen && <div className="lab-sidebar-overlay" onClick={() => setIsSyllabusOpen(false)}></div>}
 
         {/* Global Syllabus / Book Outline Sidebar */}
-        <nav className={`lab-syllabus-sidebar ${isSyllabusOpen ? 'open' : ''}`}>
+        <nav className={`lab-syllabus-sidebar ${isSyllabusOpen ? 'open' : ''} ${isSyllabusCollapsed ? 'collapsed' : ''}`}>
           <div className="syllabus-header">
-            <ListIcon size={16} />
-            <span>Curriculum</span>
-            <button className="syllabus-close-btn" onClick={() => setIsSyllabusOpen(false)}><XCircle size={20}/></button>
+            {!isSyllabusCollapsed && (
+              <>
+                <ListIcon size={16} />
+                <span>Curriculum</span>
+              </>
+            )}
+            <button 
+              className="syllabus-collapse-btn desktop-only" 
+              onClick={() => setIsSyllabusCollapsed(!isSyllabusCollapsed)}
+              title={isSyllabusCollapsed ? "Expand Curriculum" : "Collapse Curriculum"}
+            >
+              {isSyllabusCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
+            </button>
+            <button className="syllabus-close-btn mobile-only" onClick={() => setIsSyllabusOpen(false)}><XCircle size={20}/></button>
           </div>
-          <div className="syllabus-list">
-            {chapters.map((c, i) => {
-              const chapterProgress = getChapterProgress(c.slug);
-              const isActive = c.slug === slug;
-              return (
-                <Link 
-                  key={c.id} 
-                  to={`/interactive/${c.slug}`}
-                  className={`syllabus-item ${isActive ? 'active' : ''} ${chapterProgress.completed ? 'completed' : ''}`}
-                >
-                  <div className="item-number">{i + 1}</div>
-                  <div className="item-title">{c.title.split(': ').pop()}</div>
-                  {chapterProgress.completed && (
-                    <div className="item-status">
-                      <CheckIcon size={14} />
-                    </div>
-                  )}
-                </Link>
-              );
-            })}
-          </div>
+          
+          {!isSyllabusCollapsed && (
+            <div className="syllabus-list">
+              {chapters.map((c, i) => {
+                const chapterProgress = getChapterProgress(c.slug);
+                const isActive = c.slug === slug;
+                return (
+                  <Link 
+                    key={c.id} 
+                    to={`/interactive/${c.slug}`}
+                    className={`syllabus-item ${isActive ? 'active' : ''} ${chapterProgress.completed ? 'completed' : ''}`}
+                  >
+                    <div className="item-number">{i + 1}</div>
+                    <div className="item-title">{c.title.split(': ').pop()}</div>
+                    {chapterProgress.completed && (
+                      <div className="item-status">
+                        <CheckIcon size={14} />
+                      </div>
+                    )}
+                  </Link>
+                );
+              })}
+            </div>
+          )}
         </nav>
 
         {/* Left Column: Learning Tools (Visuals & Quiz) */}
@@ -621,22 +638,28 @@ export default function InteractiveMode({ chapters, onToggleView }: InteractiveM
         {/* Right Column: Deep Reading Material */}
         <section className="lab-content-column">
           {headings.length > 0 && (
-            <aside className="lab-toc-sidebar">
-              <div className="toc-header">CHAPTER OUTLINE</div>
-              <ul className="toc-list">
-                {headings.map((h, i) => (
-                  <li key={i} className="toc-item">
-                    <a href={`#${h.toLowerCase().replace(/\s+/g, '-')}`} onClick={(e) => {
-                      e.preventDefault();
-                      document.getElementById(h.toLowerCase().replace(/\s+/g, '-'))?.scrollIntoView({ behavior: 'smooth' });
-                    }}>
-                      {h}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </aside>
+            <nav className="lab-sticky-nav">
+              <div className="sticky-nav-inner">
+                <div className="sticky-nav-label">
+                  <ListIcon size={14} />
+                  <span>Module Sections</span>
+                </div>
+                <ul className="sticky-nav-list">
+                  {headings.map((h, i) => (
+                    <li key={i} className="sticky-nav-item">
+                      <a href={`#${h.toLowerCase().replace(/\s+/g, '-')}`} onClick={(e) => {
+                        e.preventDefault();
+                        document.getElementById(h.toLowerCase().replace(/\s+/g, '-'))?.scrollIntoView({ behavior: 'smooth' });
+                      }}>
+                        {h}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </nav>
           )}
+
           <div className="lab-reader-surface">
             <AnimatePresence mode="wait">
               {loading ? (
