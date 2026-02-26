@@ -1,7 +1,82 @@
-import { useRef } from 'react';
+import { useRef, useMemo } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
-import { Icosahedron, Box, Sphere, MeshDistortMaterial, Line, Float, Stars } from '@react-three/drei';
+import { Icosahedron, Box, Sphere, MeshDistortMaterial, Line, Float, Stars, Points, PointMaterial } from '@react-three/drei';
 import * as THREE from 'three';
+
+// ----------------------------------------------------------------------------
+// Home Page: Neural Consensus Cover (AI-Inspired generative network)
+// ----------------------------------------------------------------------------
+export const NeuralConsensus = () => {
+  const groupRef = useRef<THREE.Group>(null);
+  
+  // Create static set of points
+  const count = 100;
+  const points = useMemo(() => {
+    const p = new Float32Array(count * 3);
+    for (let i = 0; i < count; i++) {
+      p[i * 3] = (Math.random() - 0.5) * 10;
+      p[i * 3 + 1] = (Math.random() - 0.5) * 10;
+      p[i * 3 + 2] = (Math.random() - 0.5) * 10;
+    }
+    return p;
+  }, []);
+
+  useFrame((state) => {
+    if (groupRef.current) {
+      groupRef.current.rotation.y = state.clock.elapsedTime * 0.05;
+      groupRef.current.rotation.x = Math.sin(state.clock.elapsedTime * 0.2) * 0.1;
+    }
+  });
+
+  return (
+    <group ref={groupRef}>
+      <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
+      
+      {/* Dynamic Nodes */}
+      <Points positions={points}>
+        <PointMaterial 
+          transparent 
+          color="#3b82f6" 
+          size={0.05} 
+          sizeAttenuation={true} 
+          depthWrite={false} 
+          blending={THREE.AdditiveBlending}
+        />
+      </Points>
+
+      {/* Connectivity Lattice (Simplified representation) */}
+      {[...Array(20)].map((_, i) => (
+        <Line
+          key={i}
+          points={[
+            [points[i*3], points[i*3+1], points[i*3+2]],
+            [points[(i+1)*3] || 0, points[(i+1)*3+1] || 0, points[(i+1)*3+2] || 0]
+          ]}
+          color="#1d4ed8"
+          lineWidth={0.5}
+          transparent
+          opacity={0.2}
+        />
+      ))}
+
+      {/* Central Core Brain */}
+      <Float speed={2} rotationIntensity={1} floatIntensity={1}>
+        <Sphere args={[1.5, 32, 32]}>
+          <MeshDistortMaterial 
+            color="#3b82f6" 
+            emissive="#1d4ed8" 
+            emissiveIntensity={0.5} 
+            distort={0.4} 
+            speed={2} 
+            roughness={0}
+            transparent
+            opacity={0.1}
+          />
+        </Sphere>
+      </Float>
+    </group>
+  );
+};
 
 // ----------------------------------------------------------------------------
 // Core Bitcoin Engine (Decentralized Nodes & Hashing)
@@ -222,6 +297,59 @@ export const SolanaVisual = () => {
 };
 
 // ----------------------------------------------------------------------------
+// Custody & Cryptography (Entropy & Keys)
+// ----------------------------------------------------------------------------
+export const CustodyVisual = ({ entropy }: { entropy: number }) => {
+  const pointsRef = useRef<THREE.Group>(null);
+  
+  useFrame((state) => {
+    if (pointsRef.current) {
+      pointsRef.current.rotation.y = state.clock.elapsedTime * 0.2;
+      // Particles condense as entropy increases
+      const scale = 1 + (1 - entropy) * 2;
+      pointsRef.current.scale.set(scale, scale, scale);
+    }
+  });
+
+  return (
+    <group>
+      <group ref={pointsRef}>
+        {[...Array(50)].map((_, i) => (
+          <mesh key={i} position={[
+            Math.sin(i * 0.5) * 2,
+            Math.cos(i * 0.8) * 2,
+            Math.sin(i * 1.2) * 2
+          ]}>
+            <boxGeometry args={[0.05, 0.05, 0.05]} />
+            <meshStandardMaterial 
+              color={entropy > 0.8 ? "#3b82f6" : "#6366f1"} 
+              emissive={entropy > 0.8 ? "#3b82f6" : "#000"}
+              emissiveIntensity={entropy * 2}
+            />
+          </mesh>
+        ))}
+      </group>
+      
+      {/* The "Key" Core */}
+      <mesh>
+        <octahedronGeometry args={[0.8, 0]} />
+        <meshStandardMaterial 
+          color="#ffffff" 
+          wireframe 
+          transparent 
+          opacity={entropy} 
+        />
+      </mesh>
+
+      {/* Outer shield */}
+      <Sphere args={[2.5, 32, 32]}>
+        <meshBasicMaterial color="#3b82f6" transparent opacity={0.05 * entropy} wireframe />
+      </Sphere>
+    </group>
+  );
+};
+
+// ----------------------------------------------------------------------------
 // Generic Fallback (Network graph)
 // ----------------------------------------------------------------------------
 export const GenericVisual = () => {
@@ -243,6 +371,54 @@ export const GenericVisual = () => {
       <Sphere args={[0.5, 16, 16]}>
         <meshStandardMaterial color="#ffffff" emissive="#ffffff" emissiveIntensity={0.5} />
       </Sphere>
+    </group>
+  );
+};
+
+// ----------------------------------------------------------------------
+// Mini Blockchain Progress Bar (Header)
+// ----------------------------------------------------------------------
+export const BlockchainProgress = ({ chapters, currentSlug, getProgress }: { 
+  chapters: any[], 
+  currentSlug: string, 
+  getProgress: (slug: string) => { completed: boolean } 
+}) => {
+  return (
+    <group scale={0.4}>
+      {chapters.map((ch, i) => {
+        const { completed } = getProgress(ch.slug);
+        const isActive = ch.slug === currentSlug;
+        const xPos = (i - chapters.length / 2) * 1.5;
+
+        return (
+          <group key={ch.id} position={[xPos, 0, 0]}>
+            {/* The Block */}
+            <Float speed={isActive ? 2 : 0} rotationIntensity={0.2} floatIntensity={0.5}>
+              <Box args={[1, 1, 1]}>
+                <meshStandardMaterial 
+                  color={completed ? "#3b82f6" : (isActive ? "#facc15" : "#1f2937")}
+                  emissive={completed ? "#3b82f6" : (isActive ? "#facc15" : "#000")}
+                  emissiveIntensity={isActive ? 2 : (completed ? 0.5 : 0)}
+                  transparent
+                  opacity={completed || isActive ? 1 : 0.3}
+                  wireframe={!completed && !isActive}
+                />
+              </Box>
+            </Float>
+
+            {/* Connecting Link */}
+            {i < chapters.length - 1 && (
+              <Line
+                points={[[0.5, 0, 0], [1, 0, 0]]}
+                color={completed ? "#3b82f6" : "#374151"}
+                lineWidth={1}
+                transparent
+                opacity={0.5}
+              />
+            )}
+          </group>
+        );
+      })}
     </group>
   );
 };

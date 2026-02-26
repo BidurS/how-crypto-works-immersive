@@ -1,6 +1,9 @@
 import { motion } from 'framer-motion';
 import { Book, Brain, Globe, ArrowRight, Github, Trophy } from 'lucide-react';
+import { Canvas } from '@react-three/fiber';
+import { Suspense } from 'react';
 import { useProgress } from './hooks/useProgress';
+import { NeuralConsensus } from './components/ThreeVisuals';
 import chaptersData from './chapters.json';
 import './Home.css';
 
@@ -38,7 +41,25 @@ export default function Home({ onSelectMode }: HomeProps) {
   ];
 
   return (
-    <div className="home-container">
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0, scale: 0.95 }}
+      transition={{ duration: 0.4 }}
+      className="home-container"
+    >
+      {/* 3D Generative Background Cover */}
+      <div className="home-3d-cover">
+        <Canvas camera={{ position: [0, 0, 8], fov: 45 }}>
+          <color attach="background" args={['#020202']} />
+          <ambientLight intensity={0.5} />
+          <pointLight position={[10, 10, 10]} />
+          <Suspense fallback={null}>
+            <NeuralConsensus />
+          </Suspense>
+        </Canvas>
+      </div>
+
       <div className="home-bg-glow"></div>
       
       <header className="home-header">
@@ -62,7 +83,7 @@ export default function Home({ onSelectMode }: HomeProps) {
           transition={{ delay: 0.2 }}
           className="home-author"
         >
-          by Larry Cermak
+          by&nbsp;&nbsp;Larry Cermak
         </motion.p>
       </header>
 
@@ -108,7 +129,7 @@ export default function Home({ onSelectMode }: HomeProps) {
 
       <footer className="home-footer">
         <div className="footer-links">
-          <a href="https://github.com/larrycermak/how-crypto-works" target="_blank" rel="noopener noreferrer">
+          <a href="https://github.com/lawmaster10/howcryptoworksbook" target="_blank" rel="noopener noreferrer">
             <Github size={18} /> <span>Open Source on GitHub</span>
           </a>
         </div>
@@ -116,6 +137,6 @@ export default function Home({ onSelectMode }: HomeProps) {
           In collaboration with Wintermute Research & The Block Research
         </p>
       </footer>
-    </div>
+    </motion.div>
   );
 }

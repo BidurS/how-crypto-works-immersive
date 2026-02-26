@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { AnimatePresence } from 'framer-motion';
 import Home from './Home';
 import Layout from './Layout';
 import Chapter from './Chapter';
@@ -48,32 +49,34 @@ function App() {
 
       if (next === 'web') navigate(`/${validSlug}`);
       else if (next === 'book') navigate(`/book/${validSlug}`);
-      else navigate(`/interactive/${validSlug}`);
+      else navigate(`/interactive/${next === 'interactive' ? 'bitcoin' : validSlug}`); // Special case for first interactive entry
       
       return next;
     });
   };
 
   return (
-    <Routes>
-      <Route path="/" element={<Home onSelectMode={handleModeSelect} />} />
-      
-      {/* Web Mode Routes */}
-      <Route element={<Layout chapters={chaptersData} onToggleView={toggleViewMode} />}>
-        <Route path="/:slug" element={<Chapter chapters={chaptersData} />} />
-      </Route>
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={location.pathname.split('/')[1] || 'root'}>
+        <Route path="/" element={<Home onSelectMode={handleModeSelect} />} />
+        
+        {/* Web Mode Routes */}
+        <Route element={<Layout chapters={chaptersData} onToggleView={toggleViewMode} />}>
+          <Route path="/:slug" element={<Chapter chapters={chaptersData} />} />
+        </Route>
 
-      {/* Book Mode Routes */}
-      <Route path="/book/:slug" element={<BookMode chapters={chaptersData} onToggleView={toggleViewMode} />} />
-      <Route path="/book" element={<Navigate to={`/book/${firstChapterSlug}`} replace />} />
+        {/* Book Mode Routes */}
+        <Route path="/book/:slug" element={<BookMode chapters={chaptersData} onToggleView={toggleViewMode} />} />
+        <Route path="/book" element={<Navigate to={`/book/${firstChapterSlug}`} replace />} />
 
-      {/* Interactive Mode Routes */}
-      <Route path="/interactive/:slug" element={<InteractiveMode chapters={chaptersData} onToggleView={toggleViewMode} />} />
-      <Route path="/interactive" element={<Navigate to={`/interactive/${firstChapterSlug}`} replace />} />
+        {/* Interactive Mode Routes */}
+        <Route path="/interactive/:slug" element={<InteractiveMode chapters={chaptersData} onToggleView={toggleViewMode} />} />
+        <Route path="/interactive" element={<Navigate to={`/interactive/${firstChapterSlug}`} replace />} />
 
-      {/* Catch-all */}
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+        {/* Catch-all */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </AnimatePresence>
   );
 }
 

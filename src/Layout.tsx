@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { NavLink, Outlet, useLocation, Link } from 'react-router-dom';
-import { Menu, X, Moon, Sun, BookOpen, Github, Brain, Home } from 'lucide-react';
+import { Menu, X, Moon, Sun, BookOpen, Github, Home, Layers } from 'lucide-react';
 import './Layout.css';
 
 interface ChapterMeta {
@@ -53,11 +53,11 @@ export default function Layout({ chapters, onToggleView }: LayoutProps) {
         </button>
         <span className="mobile-title">How Crypto Actually Works</span>
         <div className="header-actions">
-          <Link to="/" className="icon-button" title="Back to Front Page">
+          <Link to="/" className="icon-button" title="Exit to Home">
             <Home size={20} />
           </Link>
-          <button className="icon-button" onClick={onToggleView} title="Cycle View Mode">
-            <BookOpen size={20} />
+          <button className="icon-button" onClick={onToggleView} title="Switch Reading Mode">
+            <Layers size={20} />
           </button>
           <button className="icon-button" onClick={toggleTheme} aria-label="Toggle Theme">
             {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
@@ -79,7 +79,7 @@ export default function Layout({ chapters, onToggleView }: LayoutProps) {
               <BookOpen size={24} className="brand-icon" />
               <div className="brand-text">
                 <h1 className="brand-title">How Crypto Actually Works</h1>
-                <span className="brand-author">by Larry Cermak</span>
+                <span className="brand-author">by&nbsp;&nbsp;Larry Cermak</span>
               </div>
             </div>
           </Link>
@@ -105,12 +105,12 @@ export default function Layout({ chapters, onToggleView }: LayoutProps) {
 
         <div className="sidebar-footer">
           <div className="sidebar-credits">
-            <p>In collaboration with <strong>Wintermute Research</strong> & <strong>The Block Research</strong></p>
+            <p>In collaboration with <strong>Wintermute</strong> & <strong>The Block</strong></p>
           </div>
           
           <div className="sidebar-actions-grid">
             <button className="sidebar-action-btn" onClick={onToggleView}>
-              <Brain size={16} /> <span>Cycle Mode</span>
+              <Layers size={16} /> <span>Switch View Mode</span>
             </button>
             <button className="sidebar-action-btn" onClick={toggleTheme}>
               {theme === 'light' ? (
@@ -120,10 +120,10 @@ export default function Layout({ chapters, onToggleView }: LayoutProps) {
               )}
             </button>
             <Link to="/" className="sidebar-action-btn">
-              <Home size={16} /> <span>Front Page</span>
+              <Home size={16} /> <span>Exit to Home</span>
             </Link>
             <a 
-              href="https://github.com/larrycermak/how-crypto-works" 
+              href="https://github.com/lawmaster10/howcryptoworksbook" 
               target="_blank" 
               rel="noopener noreferrer" 
               className="sidebar-action-btn github-link"

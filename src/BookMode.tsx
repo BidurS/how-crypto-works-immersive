@@ -167,7 +167,15 @@ export default function BookMode({ chapters, onToggleView }: BookModeProps) {
   };
 
   return (
-    <div className="book-mode-container" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0, scale: 1.05 }}
+      transition={{ duration: 0.4 }}
+      className="book-mode-container" 
+      onTouchStart={handleTouchStart} 
+      onTouchEnd={handleTouchEnd}
+    >
       <div className="book-background-decor">
         <div className="decor-shape shape-1"></div>
         <div className="decor-shape shape-2"></div>
@@ -206,7 +214,7 @@ export default function BookMode({ chapters, onToggleView }: BookModeProps) {
                 <div className="cover-footer">
                   <div className="cover-author">
                     <span className="by">BY</span>
-                    <span className="author-name">LARRY CERMAK</span>
+                    <span className="author-name">&nbsp;&nbsp;LARRY CERMAK</span>
                   </div>
                 </div>
               </div>
@@ -224,7 +232,7 @@ export default function BookMode({ chapters, onToggleView }: BookModeProps) {
                     <div className="mini-avatar"><User size={20} /></div>
                     <div className="mini-text">
                       <span className="mini-name">Larry Cermak</span>
-                      <span className="mini-role">Author</span>
+                      <span className="mini-role" style={{ marginTop: '4px', display: 'block' }}>Author</span>
                     </div>
                   </div>
                 </div>
@@ -234,7 +242,7 @@ export default function BookMode({ chapters, onToggleView }: BookModeProps) {
                 </div>
                 <div className="left-page-footer detailed">
                   <div className="attribution-links">
-                    <a href="https://github.com/larrycermak/how-crypto-works" target="_blank" rel="noopener noreferrer"><Github size={14} /> <span>GitHub</span></a>
+                    <a href="https://github.com/lawmaster10/howcryptoworksbook" target="_blank" rel="noopener noreferrer"><Github size={14} /> <span>GitHub</span></a>
                   </div>
                   <div className="book-license-info">
                     <p>© 2026. CC BY-NC-ND 4.0.</p>
@@ -329,6 +337,6 @@ export default function BookMode({ chapters, onToggleView }: BookModeProps) {
           </>
         )}
       </AnimatePresence>
-    </div>
+    </motion.div>
   );
 }
