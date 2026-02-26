@@ -132,7 +132,7 @@
 .author-strip {
   display: flex;
   align-items: center;
-  gap: 2rem;
+  gap: 2.5rem;
 }
 
 .author-photo-hex {
