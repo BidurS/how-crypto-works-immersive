@@ -8,7 +8,6 @@ import {
   ChevronRight,
   Loader2,
   Book as BookIcon,
-  User,
   ArrowLeft,
   X,
   Layers,
@@ -243,7 +242,9 @@ export default function BookMode({ chapters, onToggleView }: BookModeProps) {
                     <h2 className="chapter-big-title">{chapterMeta?.title}</h2>
                   </div>
                   <div className="author-mini-card">
-                    <div className="mini-avatar"><User size={20} /></div>
+                    <div className="mini-avatar">
+                      <img src="/larry.jpg" alt="Larry Cermak" />
+                    </div>
                     <div className="mini-text">
                       <span className="mini-name">Larry Cermak</span>
                       <span className="mini-role" style={{ marginTop: '4px', display: 'block' }}>Author</span>
