@@ -353,6 +353,33 @@ const quizDatabase: Record<string, any> = {
 // ----------------------------------------------------------------------
 // Main Interactive Mode Component
 // ----------------------------------------------------------------------
+// ----------------------------------------------------------------------
+// Technical Theme Colors
+// ----------------------------------------------------------------------
+const getChapterColor = (slug: string) => {
+  const colors: Record<string, string> = {
+    bitcoin: '#facc15',
+    ethereum: '#a855f7',
+    solana: '#14f195',
+    defi: '#ec4899',
+    mev: '#ef4444',
+    custody: '#3b82f6',
+    market_structure: '#6366f1',
+    stablecoins_rwas: '#10b981',
+    hyperliquid: '#8b5cf6',
+    nfts: '#f43f5e',
+    governance: '#f97316',
+    depin: '#06b6d4',
+    quantum_resistance: '#14b8a6',
+    prediction_markets: '#f59e0b',
+    preface: '#94a3b8'
+  };
+  return colors[slug] || '#3b82f6';
+};
+
+// ----------------------------------------------------------------------
+// Main Interactive Mode Component
+// ----------------------------------------------------------------------
 export default function InteractiveMode({ chapters, onToggleView }: InteractiveModeProps) {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
@@ -380,10 +407,31 @@ export default function InteractiveMode({ chapters, onToggleView }: InteractiveM
   const chapterMeta = chapters[currentIndex];
   const nextChapter = currentIndex < chapters.length - 1 ? chapters[currentIndex + 1] : null;
   const currentQuizData = quizDatabase[slug || ''] || null;
+  const activeColor = getChapterColor(slug || '');
 
   // Reading Time & TOC Logic
   const readingTime = Math.ceil(content.split(/\s+/).length / 200);
   const headings = content.match(/^##\s+.+$/gm)?.map(h => h.replace('## ', '')) || [];
+  const [activeSection, setActiveSection] = useState<string>('');
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setActiveSection(entry.target.id);
+          }
+        });
+      },
+      { rootMargin: '-15% 0% -70% 0%', threshold: 0 }
+    );
+
+    const elements = document.querySelectorAll('.lab-h2, .lab-h3');
+    if (elements.length > 0) observer.observe(elements[0]);
+    elements.forEach((el) => observer.observe(el));
+
+    return () => observer.disconnect();
+  }, [content, loading]);
 
   useEffect(() => {
     if (!chapterMeta) return;
@@ -436,7 +484,7 @@ export default function InteractiveMode({ chapters, onToggleView }: InteractiveM
   };
 
   return (
-    <div className="learning-lab-container">
+    <div className="learning-lab-container" style={{ '--active-accent': activeColor } as any}>
       {/* Top Header Navigation */}
       <header className="lab-header">
         <div className="lab-header-left">
@@ -447,7 +495,7 @@ export default function InteractiveMode({ chapters, onToggleView }: InteractiveM
         </div>
         <div className="lab-header-center">
           <div className="lab-chapter-badges">
-            <div className="lab-chapter-badge">MODULE {currentIndex + 1}</div>
+            <div className="lab-chapter-badge" style={{ backgroundColor: activeColor }}>MODULE {currentIndex + 1}</div>
             <div className="lab-time-badge">{readingTime} MIN READ</div>
           </div>
           <h1 className="lab-module-title">{chapterMeta?.title}</h1>
@@ -492,13 +540,15 @@ export default function InteractiveMode({ chapters, onToggleView }: InteractiveM
               {chapters.map((c, i) => {
                 const chapterProgress = getChapterProgress(c.slug);
                 const isActive = c.slug === slug;
+                const color = getChapterColor(c.slug);
                 return (
                   <Link 
                     key={c.id} 
                     to={`/interactive/${c.slug}`}
                     className={`syllabus-item ${isActive ? 'active' : ''} ${chapterProgress.completed ? 'completed' : ''}`}
+                    style={isActive ? { borderRightColor: color, backgroundColor: `${color}10` } : {}}
                   >
-                    <div className="item-number">{i + 1}</div>
+                    <div className="item-number" style={isActive ? { backgroundColor: color } : {}}>{i + 1}</div>
                     <div className="item-title">{c.title.split(': ').pop()}</div>
                     {chapterProgress.completed && (
                       <div className="item-status">
@@ -637,28 +687,48 @@ export default function InteractiveMode({ chapters, onToggleView }: InteractiveM
 
         {/* Right Column: Deep Reading Material */}
         <section className="lab-content-column">
-          {headings.length > 0 && (
-            <nav className="lab-sticky-nav">
-              <div className="sticky-nav-inner">
-                <div className="sticky-nav-label">
-                  <ListIcon size={14} />
-                  <span>Module Sections</span>
+          <nav className="lab-sticky-nav">
+            <div className="sticky-nav-inner">
+              <ul className="sticky-nav-list">
+                {/* Book Outline Level (Modules) */}
+                <div className="sticky-nav-group chapters-group">
+                  {chapters.map((c, i) => {
+                    const isActive = c.slug === slug;
+                    const color = getChapterColor(c.slug);
+                    return (
+                      <li key={c.id} className={`sticky-nav-item chapter-item ${isActive ? 'active' : ''}`}>
+                        <Link 
+                          to={`/interactive/${c.slug}`}
+                          style={isActive ? { color: color, borderColor: color } : {}}
+                        >
+                          CH {i}
+                        </Link>
+                      </li>
+                    );
+                  })}
                 </div>
-                <ul className="sticky-nav-list">
-                  {headings.map((h, i) => (
-                    <li key={i} className="sticky-nav-item">
-                      <a href={`#${h.toLowerCase().replace(/\s+/g, '-')}`} onClick={(e) => {
-                        e.preventDefault();
-                        document.getElementById(h.toLowerCase().replace(/\s+/g, '-'))?.scrollIntoView({ behavior: 'smooth' });
-                      }}>
-                        {h}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </nav>
-          )}
+                
+                <div className="sticky-nav-divider"></div>
+
+                {/* Chapter Outline Level (Sections) */}
+                <div className="sticky-nav-group sections-group">
+                  {headings.map((h, i) => {
+                    const id = h.toLowerCase().replace(/\s+/g, '-');
+                    return (
+                      <li key={i} className={`sticky-nav-item section-item ${activeSection === id ? 'active' : ''}`}>
+                        <a href={`#${id}`} onClick={(e) => {
+                          e.preventDefault();
+                          document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+                        }}>
+                          {h}
+                        </a>
+                      </li>
+                    );
+                  })}
+                </div>
+              </ul>
+            </div>
+          </nav>
 
           <div className="lab-reader-surface">
             <AnimatePresence mode="wait">
