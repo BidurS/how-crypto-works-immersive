@@ -15,7 +15,8 @@ import {
   HelpCircle,
   Maximize,
   Github,
-  Home
+  Home,
+  Sparkles
 } from 'lucide-react';
 import './BookMode.css';
 
@@ -206,15 +207,28 @@ export default function BookMode({ chapters, onToggleView }: BookModeProps) {
             }}
           >
             <div className="book-page book-cover-front" onClick={isCoverOpen ? () => setIsCoverOpen(false) : undefined}>
+              <div className="book-glint"></div>
               <div className="cover-content">
-                <div className="cover-title-wrap">
-                  <span className="cover-series">AN IN-DEPTH GUIDE</span>
-                  <h1 className="cover-title">HOW<br />CRYPTO<br />ACTUALLY<br />WORKS</h1>
+                <div className="mockup-header">
+                  <Sparkles size={16} className="sparkle-icon" />
+                  <span>PRE-FIRST EDITION</span>
                 </div>
-                <div className="cover-footer">
-                  <div className="cover-author">
-                    <span className="by">BY</span>
-                    <span className="author-name">&nbsp;&nbsp;LARRY CERMAK</span>
+                
+                <div className="mockup-main">
+                  <h1 className="cover-title">HOW<br />CRYPTO<br />ACTUALLY<br />WORKS</h1>
+                  <div className="mockup-divider"></div>
+                  <p className="mockup-subtitle">THE DEFINITIVE TECHNICAL MANUAL ON PROTOCOL ARCHITECTURE</p>
+                </div>
+
+                <div className="mockup-footer">
+                  <div className="author-strip">
+                    <div className="author-photo-hex">
+                      <img src="/larry.jpg" alt="Larry Cermak" />
+                    </div>
+                    <div className="author-info">
+                      <span className="by-pre">WRITTEN BY</span>
+                      <span className="author-name">LARRY CERMAK</span>
+                    </div>
                   </div>
                 </div>
               </div>
