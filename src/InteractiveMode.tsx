@@ -377,6 +377,21 @@ const getChapterColor = (slug: string) => {
   return colors[slug] || '#3b82f6';
 };
 
+const getContrastColor = (hexcolor: string) => {
+  // If no color, default to white
+  if (!hexcolor) return '#ffffff';
+  // Remove the # if present
+  const hex = hexcolor.replace('#', '');
+  // Convert to RGB
+  const r = parseInt(hex.substr(0, 2), 16);
+  const g = parseInt(hex.substr(2, 2), 16);
+  const b = parseInt(hex.substr(4, 2), 16);
+  // Calculate brightness (YIQ formula)
+  const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+  // Return black for bright colors, white for dark colors
+  return (yiq >= 128) ? '#000000' : '#ffffff';
+};
+
 // ----------------------------------------------------------------------
 // Main Interactive Mode Component
 // ----------------------------------------------------------------------
@@ -695,11 +710,12 @@ export default function InteractiveMode({ chapters, onToggleView }: InteractiveM
                   {chapters.map((c, i) => {
                     const isActive = c.slug === slug;
                     const color = getChapterColor(c.slug);
+                    const textColor = isActive ? getContrastColor(color) : '#444';
                     return (
                       <li key={c.id} className={`sticky-nav-item chapter-item ${isActive ? 'active' : ''}`}>
                         <Link 
                           to={`/interactive/${c.slug}`}
-                          style={isActive ? { color: color, borderColor: color } : {}}
+                          style={isActive ? { backgroundColor: color, color: textColor, borderColor: color } : {}}
                         >
                           CH {i}
                         </Link>
