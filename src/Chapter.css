@@ -1,0 +1,247 @@
+.chapter-container {
+  width: 100%;
+  max-width: 800px;
+  padding: 4rem 2rem;
+  margin: 0 auto;
+}
+
+.loader-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 50vh;
+  color: var(--accent-color);
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.reading-progress-bar {
+  position: fixed;
+  top: 0;
+  left: 300px;
+  right: 0;
+  height: 4px;
+  background-color: var(--accent-color);
+  z-index: 50;
+  transition: width 0.1s ease-out;
+}
+
+/* Markdown Content Styling */
+.chapter-content {
+  font-family: var(--font-serif);
+  font-size: 1.125rem;
+  line-height: 1.8;
+  color: var(--text-primary);
+}
+
+.chapter-content h1 {
+  font-family: var(--font-sans);
+  font-size: 2.5rem;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  margin-top: 0;
+  margin-bottom: 2rem;
+  line-height: 1.2;
+}
+
+.section-heading {
+  font-family: var(--font-sans);
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-top: 3rem;
+  margin-bottom: 1.5rem;
+  letter-spacing: -0.025em;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.sub-section-heading {
+  font-family: var(--font-sans);
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+}
+
+.paragraph {
+  margin-bottom: 1.5rem;
+}
+
+.list-disc {
+  list-style-type: disc;
+  padding-left: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.list-decimal {
+  list-style-type: decimal;
+  padding-left: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.list-item {
+  margin-bottom: 0.5rem;
+}
+
+.quote {
+  font-style: italic;
+  color: var(--text-secondary);
+  border-left: 4px solid var(--quote-border);
+  padding-left: 1.5rem;
+  margin-left: 0;
+  margin-bottom: 1.5rem;
+  background-color: var(--sidebar-bg);
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  border-top-right-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
+}
+
+.code-block {
+  font-family: var(--font-mono);
+  background-color: var(--code-bg);
+  padding: 0.2em 0.4em;
+  border-radius: 0.25rem;
+  font-size: 0.875em;
+}
+
+.code-block.block {
+  display: block;
+  padding: 1rem;
+  overflow-x: auto;
+  margin-bottom: 1.5rem;
+  line-height: 1.5;
+  border: 1px solid var(--border-color);
+}
+
+.chapter-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+  margin: 2rem 0;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.chapter-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 2rem;
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+}
+
+.chapter-content th,
+.chapter-content td {
+  border: 1px solid var(--border-color);
+  padding: 0.75rem;
+  text-align: left;
+}
+
+.chapter-content th {
+  background-color: var(--sidebar-bg);
+  font-weight: 600;
+}
+
+/* Navigation Footer */
+.chapter-navigation {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 4rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.nav-spacer {
+  flex: 1;
+}
+
+.nav-btn {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  border-radius: 0.5rem;
+  transition: background-color 0.2s;
+  max-width: 48%;
+  text-align: left;
+}
+
+.nav-btn.next {
+  text-align: right;
+  flex-direction: row;
+}
+
+.nav-btn:hover {
+  background-color: var(--sidebar-hover);
+}
+
+.nav-btn-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.nav-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+  margin-bottom: 0.25rem;
+}
+
+.nav-title {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--accent-color);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+/* Responsive Overrides */
+@media (max-width: 1024px) {
+  .reading-progress-bar {
+    left: 0;
+    top: 60px; /* Below mobile header */
+  }
+}
+
+@media (max-width: 640px) {
+  .chapter-container {
+    padding: 2rem 1rem;
+  }
+  
+  .chapter-content h1 {
+    font-size: 2rem;
+  }
+  
+  .section-heading {
+    font-size: 1.5rem;
+  }
+  
+  .chapter-navigation {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .nav-btn {
+    max-width: 100%;
+    width: 100%;
+  }
+  
+  .nav-btn.next {
+    text-align: left;
+    flex-direction: row-reverse;
+    justify-content: space-between;
+  }
+}

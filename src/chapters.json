@@ -1,0 +1,114 @@
+[
+  {
+    "id": "chapter-0",
+    "slug": "preface",
+    "title": "Preface: Why This Matters",
+    "filename": "_preface.md",
+    "path": "/chapters/_preface.md"
+  },
+  {
+    "id": "chapter-1",
+    "slug": "bitcoin",
+    "title": "Chapter I: A Comprehensive Introduction to Bitcoin",
+    "filename": "ch01_bitcoin.md",
+    "path": "/chapters/ch01_bitcoin.md"
+  },
+  {
+    "id": "chapter-2",
+    "slug": "ethereum",
+    "title": "Chapter II: The Ethereum Ecosystem",
+    "filename": "ch02_ethereum.md",
+    "path": "/chapters/ch02_ethereum.md"
+  },
+  {
+    "id": "chapter-3",
+    "slug": "solana",
+    "title": "Chapter III: The Solana Ecosystem",
+    "filename": "ch03_solana.md",
+    "path": "/chapters/ch03_solana.md"
+  },
+  {
+    "id": "chapter-4",
+    "slug": "l1_blockchains",
+    "title": "Chapter IV: L1 Blockchains",
+    "filename": "ch04_l1_blockchains.md",
+    "path": "/chapters/ch04_l1_blockchains.md"
+  },
+  {
+    "id": "chapter-5",
+    "slug": "custody",
+    "title": "Chapter V: Custody Fundamentals",
+    "filename": "ch05_custody.md",
+    "path": "/chapters/ch05_custody.md"
+  },
+  {
+    "id": "chapter-6",
+    "slug": "market_structure",
+    "title": "Chapter VI: Crypto Market Structure and Trading",
+    "filename": "ch06_market_structure.md",
+    "path": "/chapters/ch06_market_structure.md"
+  },
+  {
+    "id": "chapter-7",
+    "slug": "defi",
+    "title": "Chapter VII: DeFi",
+    "filename": "ch07_defi.md",
+    "path": "/chapters/ch07_defi.md"
+  },
+  {
+    "id": "chapter-8",
+    "slug": "mev",
+    "title": "Chapter VIII: MEV",
+    "filename": "ch08_mev.md",
+    "path": "/chapters/ch08_mev.md"
+  },
+  {
+    "id": "chapter-9",
+    "slug": "stablecoins_rwas",
+    "title": "Chapter IX: Stablecoins and RWAs",
+    "filename": "ch09_stablecoins_rwas.md",
+    "path": "/chapters/ch09_stablecoins_rwas.md"
+  },
+  {
+    "id": "chapter-10",
+    "slug": "hyperliquid",
+    "title": "Chapter X: Hyperliquid",
+    "filename": "ch10_hyperliquid.md",
+    "path": "/chapters/ch10_hyperliquid.md"
+  },
+  {
+    "id": "chapter-11",
+    "slug": "nfts",
+    "title": "Chapter XI: Non-Fungible Tokens (NFTs)",
+    "filename": "ch11_nfts.md",
+    "path": "/chapters/ch11_nfts.md"
+  },
+  {
+    "id": "chapter-12",
+    "slug": "governance",
+    "title": "Chapter XII: Governance and Token Economics",
+    "filename": "ch12_governance.md",
+    "path": "/chapters/ch12_governance.md"
+  },
+  {
+    "id": "chapter-13",
+    "slug": "depin",
+    "title": "Chapter XIII: DePIN",
+    "filename": "ch13_depin.md",
+    "path": "/chapters/ch13_depin.md"
+  },
+  {
+    "id": "chapter-14",
+    "slug": "quantum_resistance",
+    "title": "Chapter XIV: Quantum Resistance",
+    "filename": "ch14_quantum_resistance.md",
+    "path": "/chapters/ch14_quantum_resistance.md"
+  },
+  {
+    "id": "chapter-15",
+    "slug": "prediction_markets",
+    "title": "Chapter XV: Prediction Markets",
+    "filename": "ch15_prediction_markets.md",
+    "path": "/chapters/ch15_prediction_markets.md"
+  }
+]
